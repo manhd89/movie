@@ -426,7 +426,8 @@ async function loadMovieDetail(slug, episodeLinkToPlay = null, episodeNameToPlay
         document.getElementById('movie-description').textContent = movie.content || 'Không có mô tả';
         document.getElementById('movie-status').textContent = movie.episode_current || 'N/A';
         document.getElementById('movie-duration').textContent = movie.time || 'N/A';
-        // Truy cập Director và Actor từ mảng các đối tượng, sau đó map lấy tên và join lại
+        
+        // Sửa lỗi hiển thị Đạo diễn và Diễn viên
         document.getElementById('movie-director').textContent = movie.director && movie.director.length > 0 ? movie.director.map(d => d.name).join(', ') : 'N/A';
         document.getElementById('movie-actors').textContent = movie.actor && movie.actor.length > 0 ? movie.actor.map(a => a.name).join(', ') : 'N/A';
 
@@ -466,7 +467,7 @@ async function loadMovieDetail(slug, episodeLinkToPlay = null, episodeNameToPlay
                     });
                     tab.classList.add('active');
                     tab.setAttribute('aria-selected', 'true');
-                    displayEpisodes(server.server_data, movie.name, episodeLinkToPlay, episodeNameToPlay);
+                    displayEpisodes(server.server_data, movie.name, episodeLinkToPlay); // episodeNameToPlay is not needed here
                 };
                 serverTabs.appendChild(tab);
             });
@@ -474,7 +475,7 @@ async function loadMovieDetail(slug, episodeLinkToPlay = null, episodeNameToPlay
 
             // Display episodes for the determined active server
             if (appState.currentServerData[targetServerIndex]) {
-                displayEpisodes(appState.currentServerData[targetServerIndex].server_data, movie.name, episodeLinkToPlay, episodeNameToPlay);
+                displayEpisodes(appState.currentServerData[targetServerIndex].server_data, movie.name, episodeLinkToPlay); // episodeNameToPlay is not needed here
             } else {
                 episodeListDiv.innerHTML += '<p>Không có dữ liệu tập phim cho server này.</p>';
             }
