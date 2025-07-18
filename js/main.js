@@ -97,22 +97,25 @@ const API_V1 = 'https://phimapi.com/v1/api';
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('hamburger-toggle').addEventListener('click', () => {
         document.querySelector('.main-nav').classList.toggle('active');
+        // Close search bar if hamburger menu is opened
+        document.getElementById('search-bar-mobile').classList.remove('active');
     });
 
     const searchToggle = document.getElementById('search-toggle');
     const searchBarMobile = document.getElementById('search-bar-mobile');
     searchToggle.addEventListener('click', () => {
         searchBarMobile.classList.toggle('active');
+        // Close hamburger menu if search bar is opened
+        document.querySelector('.main-nav').classList.remove('active');
         if (searchBarMobile.classList.contains('active')) {
             document.getElementById('search-input-mobile').focus();
         }
     });
 
-    // Close mobile menu/search bar if clicked outside or on nav link
+    // Close mobile menu/search bar if clicked on nav link
     document.querySelector('.main-nav').addEventListener('click', (e) => {
         if (e.target.tagName === 'A') {
             document.querySelector('.main-nav').classList.remove('active');
-            searchBarMobile.classList.remove('active'); // Close search bar too
         }
     });
     // Ensure filters are loaded
@@ -161,15 +164,19 @@ async function router() {
     const mainSection = document.getElementById('movie-list');
     const detailSection = document.getElementById('movie-detail');
     const paginationSection = document.querySelector('.pagination');
+    const videoPlayer = document.getElementById('video-player');
+    const moviePoster = document.getElementById('movie-poster');
+    const detailParagraphs = document.querySelectorAll('#movie-detail p');
+    const detailEpisodeHeading = document.querySelector('#movie-detail h3'); // "Danh sách tập" heading
 
     // Reset UI visibility
-    mainSection.style.display = 'grid';
-    detailSection.style.display = 'none';
-    paginationSection.style.display = 'flex';
-    document.getElementById('video-player').style.display = 'none';
-    document.getElementById('movie-poster').style.display = 'block';
-    document.querySelectorAll('#movie-detail p').forEach(p => p.style.display = 'block');
-    document.querySelector('#movie-detail h3').style.display = 'block'; // "Danh sách tập"
+    mainSection.style.display = 'grid'; // Default to grid for movie list
+    detailSection.style.display = 'none'; // Hide detail by default
+    paginationSection.style.display = 'flex'; // Show pagination by default
+    videoPlayer.style.display = 'none'; // Hide video player by default
+    moviePoster.style.display = 'block'; // Show poster by default
+    detailParagraphs.forEach(p => p.style.display = 'block'); // Show all detail paragraphs
+    if (detailEpisodeHeading) detailEpisodeHeading.style.display = 'block'; // Show "Danh sách tập"
 
     // Clear active HLS instance
     if (hlsInstance) {
@@ -201,7 +208,7 @@ async function router() {
             appState.currentYear = '';
             appState.currentLanguage = '';
             document.getElementById('section-title').textContent = 'Phim Mới Cập Nhật';
-            document.querySelector('[data-nav="home"]').classList.add('active');
+            document.querySelector('[data-nav="home"]')?.classList.add('active');
             await fetchAndDisplayMovies(`${API_BASE}/danh-sach/phim-moi-cap-nhat?page=${appState.currentPage}`, true);
             break;
         case 'category':
@@ -403,7 +410,8 @@ async function loadMovieDetail(slug, episodeLinkToPlay = null, episodeNameToPlay
         }
 
         document.getElementById('movie-title').textContent = movie.name;
-        document.getElementById('movie-original-name').textContent = movie.original_name || 'N/A';
+        // Đảm bảo truy cập đúng thuộc tính "origin_name"
+        document.getElementById('movie-original-name').textContent = movie.origin_name || 'N/A';
         document.getElementById('movie-poster').src = movie.poster_url.includes('http') ? movie.poster_url : `https://phimimg.com/${movie.poster_url}`;
         document.getElementById('movie-poster').alt = `Poster của phim ${movie.name}`;
         document.getElementById('movie-poster').onerror = function() {
@@ -418,6 +426,7 @@ async function loadMovieDetail(slug, episodeLinkToPlay = null, episodeNameToPlay
         document.getElementById('movie-description').textContent = movie.content || 'Không có mô tả';
         document.getElementById('movie-status').textContent = movie.episode_current || 'N/A';
         document.getElementById('movie-duration').textContent = movie.time || 'N/A';
+        // Truy cập Director và Actor từ mảng các đối tượng, sau đó map lấy tên và join lại
         document.getElementById('movie-director').textContent = movie.director && movie.director.length > 0 ? movie.director.map(d => d.name).join(', ') : 'N/A';
         document.getElementById('movie-actors').textContent = movie.actor && movie.actor.length > 0 ? movie.actor.map(a => a.name).join(', ') : 'N/A';
 
@@ -464,7 +473,12 @@ async function loadMovieDetail(slug, episodeLinkToPlay = null, episodeNameToPlay
             episodeListDiv.appendChild(serverTabs);
 
             // Display episodes for the determined active server
-            displayEpisodes(appState.currentServerData[targetServerIndex].server_data, movie.name, episodeLinkToPlay, episodeNameToPlay);
+            if (appState.currentServerData[targetServerIndex]) {
+                displayEpisodes(appState.currentServerData[targetServerIndex].server_data, movie.name, episodeLinkToPlay, episodeNameToPlay);
+            } else {
+                episodeListDiv.innerHTML += '<p>Không có dữ liệu tập phim cho server này.</p>';
+            }
+
 
             // If a specific episode was meant to be played from hash, play it now
             if (episodeLinkToPlay && episodeNameToPlay) {
@@ -582,7 +596,7 @@ async function playEpisode(url, title, movieSlug) {
                         break;
                     case Hls.ErrorTypes.NETWORK_ERROR:
                         console.error("Fatal network error encountered, retrying:", data);
-                        video.src = finalSource;
+                        video.src = finalSource; // Try re-setting src
                         video.load();
                         video.play().catch(e => console.error("Video auto-play failed on retry:", e));
                         break;
@@ -633,6 +647,8 @@ function backToDetail() {
         appState.activeEpisodeElement.classList.remove('active');
         appState.activeEpisodeElement = null;
     }
+    // Navigate back to the movie detail page hash
+    navigateTo(`movie/${appState.currentSlug}`);
 }
 
 // --- Filter and Search Logic ---
@@ -733,12 +749,18 @@ function filterAndNavigate(filterType) {
     if (value === '') { // If filter is cleared
         navigateTo('home');
     } else if (filterType === 'language') {
+        // Special handling for language filters that map to categories
         if (value === 'thuyet-minh') {
             navigateTo('category/phim-thuyet-minh');
         } else if (value === 'long-tieng') {
             navigateTo('category/phim-long-tieng');
         } else if (value === 'vietsub') {
-            navigateTo('home'); // Vietsub is usually the default on 'phim-moi-cap-nhat'
+            // Vietsub is generally default, navigate to home (phim-moi-cap-nhat) or a generic all movies page if one exists
+            navigateTo('home');
+        } else {
+            // If there's a need for a generic "all movies with vietsub" or similar
+            // For now, if no specific category, navigate to home.
+            navigateTo('home');
         }
     } else {
         navigateTo(`${filterType}/${value}`);
@@ -795,10 +817,7 @@ function changePage(delta) {
     if (appState.currentPage > appState.totalPages) appState.currentPage = appState.totalPages;
 
     let targetHash;
-    let url;
-    let isRoot = false;
-
-    // Reconstruct the URL based on current appState
+    // Reconstruct the hash based on current appState
     switch (appState.currentRoute) {
         case 'home':
             targetHash = `home`;
@@ -819,13 +838,14 @@ function changePage(delta) {
             targetHash = `search/${encodeURIComponent(appState.currentKeyword)}`;
             break;
         default:
-            targetHash = `home`; // Should not happen if router is working correctly
+            targetHash = `home`; // Fallback
             break;
     }
     // Append page to hash. This is not directly read by router, but useful for user to bookmark
+    // The router will always reset appState.currentPage to 1 unless the route specifically passes it (e.g. from changePage)
+    // So, we need to pass the current page back to the router explicitly when changing page
     window.location.hash = `${targetHash}/page/${appState.currentPage}`;
 
-    // Then re-run the router to fetch content for the new page
-    // The router will re-read currentCategory, currentGenre, etc. from appState to construct the actual fetch URL
+    // Re-run the router to fetch content for the new page
     router();
 }
