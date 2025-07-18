@@ -101,6 +101,9 @@ header {
     padding: 0.5rem 0;
     border-top: 1px solid #333;
     animation: fadeInDown 0.3s ease-out;
+    max-width: 1400px; /* Match header content width */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .search-bar-mobile.active {
@@ -448,14 +451,27 @@ footer {
     }
     .header-content {
         flex-wrap: wrap;
-        justify-content: center; /* Center logo and actions when wrapped */
+        justify-content: space-between; /* Space out logo and actions */
+        row-gap: 1rem;
     }
-    .logo, .header-actions {
-        flex-basis: 50%; /* Distribute space */
+    .logo {
+        flex-basis: 100%; /* Logo takes full width above actions */
         text-align: center;
     }
     .logo h1 {
         font-size: 1.8rem;
+    }
+
+    .header-actions {
+        flex-basis: 100%; /* Actions take full width */
+        justify-content: space-between; /* Space out search and hamburger toggle */
+        margin-top: 0.5rem;
+    }
+    #search-toggle {
+        display: block; /* Show search toggle */
+    }
+    #hamburger-toggle {
+        display: block; /* Show hamburger toggle */
     }
 
     .main-nav {
@@ -465,10 +481,11 @@ footer {
         background-color: #2a2a2a;
         border-top: 1px solid #333;
         padding: 1rem 0;
+        border-radius: 0 0 8px 8px; /* Rounded corners for opened menu */
+        animation: fadeIn 0.3s ease-out;
     }
     .main-nav.active {
         display: block; /* Show on toggle */
-        animation: fadeIn 0.3s ease-out;
     }
     .main-nav ul {
         flex-direction: column;
@@ -481,24 +498,11 @@ footer {
         text-align: center;
     }
 
-    .header-actions {
-        order: -1; /* Move toggles before logo on smaller screens */
-        flex-basis: 100%;
-        justify-content: space-between;
-        margin-bottom: 1rem;
-    }
-    #search-toggle {
-        display: block; /* Show search toggle */
-    }
-    #hamburger-toggle {
-        display: block; /* Show hamburger toggle */
-    }
-
     .search-filter.desktop-only {
         display: none; /* Hide desktop filter bar */
     }
     .search-bar-mobile {
-        display: none; /* Controlled by JS */
+        padding: 0.5rem 1rem; /* Adjust padding for mobile search */
     }
 
 
