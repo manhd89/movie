@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phim Hay - Xem Phim Online</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <a href="#home"><h1>Phim Hay</h1></a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#home" data-nav="home">Trang Chủ</a></li>
+                    <li><a href="#category/phim-le" data-nav="single">Phim Lẻ</a></li>
+                    <li><a href="#category/phim-bo" data-nav="series">Phim Bộ</a></li>
+                    <li><a href="#category/hoat-hinh" data-nav="animation">Hoạt Hình</a></li>
+                    <li><a href="#category/tv-shows" data-nav="tvshows">TV Shows</a></li>
+                    <li><a href="#category/phim-thuyet-minh" data-nav="dubbed-movies">Phim Thuyết Minh</a></li>
+                    <li><a href="#category/phim-long-tieng" data-nav="dubbed-series">Phim Lồng Tiếng</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <button id="search-toggle" aria-label="Mở tìm kiếm" class="icon-button"><i class="fas fa-search"></i></button>
+                <button id="hamburger-toggle" aria-label="Mở menu" class="icon-button"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+        <div id="search-bar-mobile" class="search-bar-mobile">
+            <input type="text" id="search-input-mobile" placeholder="Tìm kiếm phim..." aria-label="Tìm kiếm phim">
+            <button onclick="performSearch()" aria-label="Tìm kiếm"><i class="fas fa-search"></i></button>
+        </div>
+    </header>
+
+    <main>
+        <div class="search-filter desktop-only">
+            <input type="text" id="search-input" placeholder="Tìm kiếm phim..." oninput="searchMoviesDelayed()" aria-label="Tìm kiếm phim">
+            <select id="genre-filter" onchange="filterAndNavigate('genre')" aria-label="Lọc theo thể loại">
+                <option value="">Tất cả thể loại</option>
+            </select>
+            <select id="country-filter" onchange="filterAndNavigate('country')" aria-label="Lọc theo quốc gia">
+                <option value="">Tất cả quốc gia</option>
+            </select>
+            <select id="year-filter" onchange="filterAndNavigate('year')" aria-label="Lọc theo năm">
+                <option value="">Tất cả năm</option>
+            </select>
+            <select id="language-filter" onchange="filterAndNavigate('language')" aria-label="Lọc theo ngôn ngữ">
+                <option value="">Tất cả ngôn ngữ</option>
+                <option value="vietsub">Vietsub</option>
+                <option value="thuyet-minh">Thuyết Minh</option>
+                <option value="long-tieng">Lồng Tiếng</option>
+            </select>
+            <button onclick="clearFiltersAndNavigate()" aria-label="Xóa bộ lọc">Xóa Bộ Lọc</button>
+        </div>
+
+        <h2 id="section-title"></h2>
+        <div id="movie-list" class="movies"></div>
+        <div id="movie-detail" class="movie-detail-container" style="display: none;">
+            <button onclick="history.back()" aria-label="Quay lại trang trước" class="back-button"><i class="fas fa-arrow-left"></i> Quay lại</button>
+            <h2 id="movie-title"></h2>
+            <div id="video-player" style="display: none;">
+                <h3 id="video-title"></h3>
+                <video id="player" controls autoplay></video>
+                <button onclick="backToDetail()" aria-label="Quay lại chi tiết phim" class="back-button"><i class="fas fa-arrow-left"></i> Quay lại chi tiết phim</button>
+            </div>
+            <img id="movie-poster" alt="Poster phim">
+            <p><strong>Tên gốc:</strong> <span id="movie-original-name"></span></p>
+            <p><strong>Năm phát hành:</strong> <span id="movie-year"></span></p>
+            <p><strong>Thể loại:</strong> <span id="movie-genres"></span></p>
+            <p><strong>Quốc gia:</strong> <span id="movie-countries"></span></p>
+            <p><strong>Đánh giá:</strong> <span id="movie-rating"></span></p>
+            <p><strong>Trạng thái:</strong> <span id="movie-status"></span></p>
+            <p><strong>Thời lượng:</strong> <span id="movie-duration"></span></p>
+            <p><strong>Đạo diễn:</strong> <span id="movie-director"></span></p>
+            <p><strong>Diễn viên:</strong> <span id="movie-actors"></span></p>
+            <p><strong>Mô tả:</strong> <span id="movie-description"></span></p>
+            <h3>Danh sách tập</h3>
+            <div id="episode-list"></div>
+        </div>
+
+        <div class="pagination">
+            <button id="prev-page" onclick="changePage(-1)" disabled aria-label="Trang trước"><i class="fas fa-chevron-left"></i></button>
+            <span id="page-info"></span>
+            <button id="next-page" onclick="changePage(1)" aria-label="Trang sau"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Phim Hay. All rights reserved.</p>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+</html>
